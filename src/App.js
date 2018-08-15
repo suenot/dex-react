@@ -8,6 +8,7 @@ import _ from 'lodash'
 import dex from './contracts/bursa_ropsten'
 import Info from './components/Info'
 import Orders from './components/Orders'
+import Sell from './components/Sell'
 import {sleep} from './utils'
 
 
@@ -31,7 +32,8 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
         'asks': {},
         'bids': {}
       },
-      bids: {}
+      bids: {},
+      web3: undefined
     };
   }
 
@@ -55,10 +57,11 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
   render() {
     // TODO
     const { orderbook, wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
-    tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN, } = this.state
+    tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN, web3, rebateAddress} = this.state
     // var asks = orderbook.asks
     const infoOptions = {wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
     tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN }
+    const sellOptions = {web3, wallet, tokenAddress, rebateAddress}
     return (
       <div>
         <style jsx="true">{`
@@ -75,6 +78,8 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
           onLayoutChange={(layout, layouts) =>
             this.onLayoutChange(layout, layouts)
           }
+          draggableCancel="input,textarea"
+          draggableHandle=".header"
         >
           <div key="1" data-grid={{ w: 2, h: 3, x: 0, y: 0, minW: 2, minH: 3 }}>
             <Info {...infoOptions} />
@@ -86,7 +91,7 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
              <Orders orders={orderbook.bids} header="BIDS" />
           </div>
           <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
-            <span className="text">4</span>
+            <Sell {...sellOptions}></Sell>
           </div>
           <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
             <span className="text">5</span>
@@ -107,6 +112,7 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
     var dexContract = new web3.eth.Contract(dex.abi, dex.address)
     var dexAddress = dex.address
     var tokenAddress = '0xafe5a978c593fe440d0c5e4854c5bd8511e770a4'
+    var rebateAddress = wallet
     var tokenContract = new web3.eth.Contract(dex.abi, tokenAddress)
     try {
       // not all erc20 has got public var "decimals"
@@ -135,6 +141,7 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
     // }
     // await getAsks()
     this.setState({
+      web3,
       wallet,
       balanceWEI,
       balanceETH,

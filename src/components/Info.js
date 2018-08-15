@@ -3,6 +3,14 @@ import React from 'react'
 export default ({ wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
     tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN }) => (
     <div>
+      <style jsx="true">{`
+          .header {
+            background: #bebebe;
+            width: 100%;
+            display: block;
+          }
+      `}</style>
+      <div class="header">Info</div>
       <p>wallet: {wallet}</p>
       <p>balanceWEI: {balanceWEI} WEI</p>
       <p>balanceETH: {balanceETH} ETH</p>

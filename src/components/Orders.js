@@ -3,7 +3,14 @@ import _ from 'lodash'
 
 export default ({ orders, header }) => (
     <div>
-      <h3>{header}</h3>
+      <style jsx="true">{`
+          .header {
+            background: #bebebe;
+            width: 100%;
+            display: block;
+          }
+      `}</style>
+      <div class="header">{header}</div>
       <table>
         <thead>
           <tr>
