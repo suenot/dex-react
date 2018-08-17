@@ -2,7 +2,6 @@ import React from "react";
 import { WidthProvider, Responsive } from "react-grid-layout";
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-
 import Identicon from 'identicon.js'
 import _ from 'lodash'
 import dex from './contracts/bursa_ropsten'
@@ -11,6 +10,9 @@ import Orders from './components/Orders'
 import Sell from './components/Sell'
 import {sleep} from './utils'
 
+import { observable } from 'mobx'
+import { inject, observer } from 'mobx-react'
+
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const originalLayouts = getFromLS("layouts") || {};
@@ -18,22 +20,48 @@ const originalLayouts = getFromLS("layouts") || {};
 /**
  * This layout demonstrates how to sync multiple responsive layouts to localstorage.
  */
-class ResponsiveLocalStorageLayout extends React.PureComponent {
+@inject('Store')
+@observer
+class App extends React.PureComponent {
+  @observable count = 0
+  @observable layouts = JSON.parse(JSON.stringify(originalLayouts))
+  @observable tokenDecimals = 18
+  @observable tokenName = '-'
+  @observable tokenSymbol = '-'
+  @observable orderbook = {
+    'asks': {},
+    'bids': {}
+  }
+  @observable web3 = undefined
+  @observable wallet = undefined
+  @observable balanceWEI = undefined
+  @observable balanceETH = undefined
+  @observable dexContract = undefined
+  @observable dexAddress = undefined
+  @observable tokenAddress = '0xafe5a978c593fe440d0c5e4854c5bd8511e770a4'
+  @observable rebateAddress = undefined
+  @observable tokenBalanceWEI = undefined
+  @observable tokenBalanceTKN = undefined
+  @observable depositWEI = undefined
+  @observable depositETH = undefined
+  @observable approvedWEI = undefined
+  @observable approvedTKN = undefined
+
   constructor(props) {
     super(props);
 
     this.state = {
-      layouts: JSON.parse(JSON.stringify(originalLayouts)),
-      tokenDecimals: 18,
-      tokenName: '-',
-      tokenSymbol: '-',
-      asks: {},
-      orderbook: {
-        'asks': {},
-        'bids': {}
-      },
-      bids: {},
-      web3: undefined
+      // layouts: JSON.parse(JSON.stringify(originalLayouts)),
+      // tokenDecimals: 18,
+      // tokenName: '-',
+      // tokenSymbol: '-',
+      // asks: {},
+      // orderbook: {
+      //   'asks': {},
+      //   'bids': {}
+      // },
+      // bids: {},
+      // web3: undefined
     };
   }
 
@@ -53,15 +81,30 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
     saveToLS("layouts", layouts);
     this.setState({ layouts });
   }
-
+  
   render() {
     // TODO
-    const { orderbook, wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
-    tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN, web3, rebateAddress} = this.state
-    // var asks = orderbook.asks
-    const infoOptions = {wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
-    tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN }
-    const sellOptions = {web3, wallet, tokenAddress, rebateAddress}
+    // const { orderbook, wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
+    // tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN, web3, rebateAddress} = this.state
+    // // var asks = orderbook.asks
+    const infoOptions = {
+      wallet: this.wallet,
+      balanceWEI: this.balanceWEI,
+      balanceETH: this.balanceETH,
+      dexAddress: this.dexAddress,
+      tokenAddress: this.tokenAddress,
+      tokenDecimals: this.tokenDecimals,
+      tokenBalanceWEI: this.tokenBalanceWEI,
+      tokenBalanceTKN: this.tokenBalanceTKN,
+      tokenName: this.tokenName,
+      tokenSymbol: this.tokenSymbol,
+      depositWEI: this.depositWEI,
+      depositETH: this.depositETH,
+      approvedWEI: this.approvedWEI,
+      approvedTKN: this.approvedTKN
+    }
+    // const sellOptions = {web3, wallet, tokenAddress, rebateAddress}
+    const {Store} = this.props
     return (
       <div>
         <style jsx="true">{`
@@ -85,16 +128,16 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
             <Info {...infoOptions} />
           </div>
           <div key="2" data-grid={{ w: 2, h: 3, x: 2, y: 0, minW: 2, minH: 3 }}>
-            <Orders orders={orderbook.asks} header="ASKS" />
+            <Orders orders={this.orderbook.asks} header="ASKS" />
           </div>
           <div key="3" data-grid={{ w: 2, h: 3, x: 4, y: 0, minW: 2, minH: 3 }}>
-             <Orders orders={orderbook.bids} header="BIDS" />
+             <Orders orders={this.orderbook.bids} header="BIDS" />
           </div>
           <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
-            <Sell {...sellOptions}></Sell>
+            {Store.birds}
           </div>
           <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
-            <span className="text">5</span>
+            {Store.wallet}
           </div>
         </ResponsiveReactGridLayout>
       </div>
@@ -105,60 +148,61 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
       'bids': {},
       'asks': {}
     }
-    var web3 = await dex._init()
-    const wallet = await dex._wallet(web3)
-    var balanceWEI = await web3.eth.getBalance(wallet)
-    var balanceETH = web3.utils.fromWei(balanceWEI)
-    var dexContract = new web3.eth.Contract(dex.abi, dex.address)
-    var dexAddress = dex.address
-    var tokenAddress = '0xafe5a978c593fe440d0c5e4854c5bd8511e770a4'
-    var rebateAddress = wallet
-    var tokenContract = new web3.eth.Contract(dex.abi, tokenAddress)
+    this.web3 = await dex._init()
+    this.wallet = await dex._wallet(this.web3)
+    this.props.Store.wallet = this.wallet
+    this.rebateAddress = this.wallet
+    this.balanceWEI = await this.web3.eth.getBalance(this.wallet)
+    this.balanceETH = this.web3.utils.fromWei(this.balanceWEI)
+    this.dexContract = new this.web3.eth.Contract(dex.abi, dex.address)
+    this.dexAddress = dex.address
+    this.tokenContract = new this.web3.eth.Contract(dex.abi, this.tokenAddress)
     try {
       // not all erc20 has got public var "decimals"
-      var tokenDecimals = await tokenContract.methods.decimals().call()
-      this.setState({ tokenDecimals })
+      this.tokenDecimals = await this.tokenContract.methods.decimals().call()
+      // this.setState({ tokenDecimals })
     } catch(err) { console.log(err) }
-    var tokenBalanceWEI = await tokenContract.methods.balanceOf(wallet).call()
-    var tokenBalanceTKN = tokenBalanceWEI / Math.pow(10, this.state.tokenDecimals)
+    this.tokenBalanceWEI = await this.tokenContract.methods.balanceOf(this.wallet).call()
+    this.tokenBalanceTKN = this.tokenBalanceWEI / Math.pow(10, this.state.tokenDecimals)
     try {
       // not all erc20 has got public var "name"
-      var tokenName = await tokenContract.methods.name().call()
-      this.setState({ tokenName })
+      this.tokenName = await this.tokenContract.methods.name().call()
+      // this.setState({ tokenName })
     } catch(err) { console.log(err) }
     try {
       // not all erc20 has got public var "symbol"
-      var tokenSymbol = await tokenContract.methods.symbol().call()
-      this.setState({ tokenSymbol })
+      this.tokenSymbol = await this.tokenContract.methods.symbol().call()
+      // this.setState({ tokenSymbol })
     } catch(err) { console.log(err) }
-    var depositWEI = await dexContract.methods.balanceOf(wallet).call()
-    var depositETH = web3.utils.fromWei(depositWEI)
-    var approvedWEI = await dexContract.methods.balanceApprovedForToken(tokenAddress, wallet).call()
-    var approvedTKN = web3.utils.fromWei(approvedWEI)
+    this.depositWEI = await this.dexContract.methods.balanceOf(this.wallet).call()
+    this.depositETH = this.web3.utils.fromWei(this.depositWEI)
+    this.approvedWEI = await this.dexContract.methods.balanceApprovedForToken(this.tokenAddress, this.wallet).call()
+    this.approvedTKN = this.web3.utils.fromWei(this.approvedWEI)
     // asks
     // var getAsks = async () => {
 
     // }
     // await getAsks()
-    this.setState({
-      web3,
-      wallet,
-      balanceWEI,
-      balanceETH,
-      dexContract,
-      dexAddress,
-      tokenAddress,
-      tokenBalanceWEI,
-      tokenBalanceTKN,
-      depositWEI,
-      depositETH,
-      approvedWEI,
-      approvedTKN
-    })
+    // this.setState({
+    //   web3,
+    //   wallet,
+    //   balanceWEI,
+    //   balanceETH,
+    //   dexContract,
+    //   dexAddress,
+    //   tokenAddress,
+    //   tokenBalanceWEI,
+    //   tokenBalanceTKN,
+    //   depositWEI,
+    //   depositETH,
+    //   approvedWEI,
+    //   approvedTKN
+    // })
 
     // Опустошитель очереди (Ice bucket)
     const dropQueue = () => {
-      var orderbook = this.state.orderbook
+      // var orderbook = this.state.orderbook
+      var orderbook = this.orderbook
       _.forEach(ORDERBOOK['asks'], function(order, i){
         orderbook['asks'][i] = order
       })
@@ -167,7 +211,8 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
       })
       // orderbook['asks'] = _.orderBy(orderbook['asks'], ['priceNumber'], ['asc'])
       ORDERBOOK = {asks: {}, bids: {}}
-      this.setState({ orderbook })
+      // this.setState({ orderbook })
+      this.orderbook = orderbook
       // TODO как-то отказаться от форса?
       this.forceUpdate()
     }
@@ -184,27 +229,27 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
     // LOAD ORDERBOOK in GLOBAL VAR
     const getOrder = async (orderPosition, type) => {
       if (type === 'asks')
-        var result = await dexContract.methods.willsellInfo(tokenAddress, orderPosition).call()
+        var result = await this.dexContract.methods.willsellInfo(this.tokenAddress, orderPosition).call()
       else // bids
-        var result = await dexContract.methods.willbuyInfo(tokenAddress, orderPosition).call()
+        var result = await this.dexContract.methods.willbuyInfo(this.tokenAddress, orderPosition).call()
       return {
         // TODO много лишнего
         id: orderPosition,
         user: result[0].toString(),
         icon: new Identicon(result[0].toString(), 18).toString(),
-        price: web3.utils.fromWei(result[1]),
-        priceNumber: parseFloat( web3.utils.fromWei(result[1]) ),
+        price: this.web3.utils.fromWei(result[1]),
+        priceNumber: parseFloat( this.web3.utils.fromWei(result[1]) ),
         priceWEI: result[1],
         priceWEINumber: parseFloat(result[1]),
-        amount: web3.utils.fromWei(result[2]),
-        amountNumber: parseFloat( web3.utils.fromWei(result[2]) ),
+        amount: this.web3.utils.fromWei(result[2]),
+        amountNumber: parseFloat( this.web3.utils.fromWei(result[2]) ),
         amountWEI: result[2],
         amountWEINumber: parseFloat(result[2]),
-        total: web3.utils.fromWei(result[1]) * web3.utils.fromWei(result[2])
+        total: this.web3.utils.fromWei(result[1]) * this.web3.utils.fromWei(result[2])
       }
     }
     const getAsksOnce = async function() {
-      for (var i=1;i<20;i++) {
+      for (var i=1;i<200;i++) {
         var order = await getOrder(i, 'asks')
         if ( order.user !== '0x0000000000000000000000000000000000000000' && order.priceNumber !== 0 && order.amountNumber !== 0 ) {
           ORDERBOOK['asks'][order.id] = order
@@ -212,7 +257,7 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
       }
     }
     const getBidsOnce = async function() {
-      for (var i=1;i<20;i++) {
+      for (var i=1;i<200;i++) {
         var order = await getOrder(i, 'bids')
         if ( order.user !== '0x0000000000000000000000000000000000000000' && order.priceNumber !== 0 && order.amountNumber !== 0 ) {
           ORDERBOOK['bids'][order.id] = order
@@ -232,7 +277,7 @@ class ResponsiveLocalStorageLayout extends React.PureComponent {
   }
 }
 
-// module.exports = ResponsiveLocalStorageLayout;
+// module.exports = App;
 
 function getFromLS(key) {
   let ls = {};
@@ -257,4 +302,4 @@ function saveToLS(key, value) {
   }
 }
 
-export default ResponsiveLocalStorageLayout
+export default App

@@ -13,6 +13,7 @@ import Favorite from '@material-ui/icons/Favorite'
 import FavoriteBorder from '@material-ui/icons/FavoriteBorder'
 //
 import Button from '@material-ui/core/Button'
+import { inject, observer } from 'mobx-react'
 
 const styles = theme => ({
   container: {
@@ -29,6 +30,8 @@ const styles = theme => ({
   },
 })
 
+@inject('Store')
+@observer
 class Sell extends React.Component {
   constructor(props) {
     super(props)
