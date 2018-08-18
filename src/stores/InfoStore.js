@@ -1,9 +1,6 @@
 import { observable, action, computed, autorun } from 'mobx'
 
-class Store {
-  @observable birds = ['Nightingale', 'Pigeon']
-  @observable count = 0
-  // @observable layouts = JSON.parse(JSON.stringify(originalLayouts))
+class InfoStore {
   @observable tokenDecimals = 18
   @observable tokenName = '-'
   @observable tokenSymbol = '-'
@@ -27,10 +24,6 @@ class Store {
   @observable approvedTKN = undefined
 }
 
-const store = window.store = new Store()
+const store = window.InfoStore = new InfoStore()
 
 export default store
-
-// autorun(() => {
-//   console.log(store.birds)
-// })

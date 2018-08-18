@@ -1,29 +1,30 @@
 import React from 'react'
+import { inject, observer } from 'mobx-react'
 
-export default ({ wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
-    tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN }) => (
-    <div>
-      <style jsx="true">{`
-          .header {
-            background: #bebebe;
-            width: 100%;
-            display: block;
-          }
-      `}</style>
-      <div class="header">Info</div>
-      <p>wallet: {wallet}</p>
-      <p>balanceWEI: {balanceWEI} WEI</p>
-      <p>balanceETH: {balanceETH} ETH</p>
-      <p>dexAddress: {dexAddress}</p>
-      <p>tokenAddress: {tokenAddress}</p>
-      <p>tokenDecimals: {tokenDecimals}</p>
-      <p>tokenBalanceWEI: {tokenBalanceWEI}</p>
-      <p>tokenBalanceTKN: {tokenBalanceTKN}</p>
-      <p>tokenName: {tokenName}</p>
-      <p>tokenSymbol: {tokenSymbol}</p>
-      <p>depositWEI: {depositWEI}</p>
-      <p>depositETH: {depositETH}</p>
-      <p>approvedWEI: {approvedWEI}</p>
-      <p>approvedTKN: {approvedTKN}</p>
-    </div>
-)
+@inject('InfoStore')
+@observer
+class Info extends React.Component {
+  render() {
+    const {InfoStore} = this.props
+    return (
+      <div>
+        <p>wallet: {InfoStore.wallet}</p>
+        <p>balanceWEI: {InfoStore.balanceWEI} WEI</p>
+        <p>balanceETH: {InfoStore.balanceETH} ETH</p>
+        <p>dexAddress: {InfoStore.dexAddress}</p>
+        <p>tokenAddress: {InfoStore.tokenAddress}</p>
+        <p>tokenDecimals: {InfoStore.tokenDecimals}</p>
+        <p>tokenBalanceWEI: {InfoStore.tokenBalanceWEI}</p>
+        <p>tokenBalanceTKN: {InfoStore.tokenBalanceTKN}</p>
+        <p>tokenName: {InfoStore.tokenName}</p>
+        <p>tokenSymbol: {InfoStore.tokenSymbol}</p>
+        <p>depositWEI: {InfoStore.depositWEI}</p>
+        <p>depositETH: {InfoStore.depositETH}</p>
+        <p>approvedWEI: {InfoStore.approvedWEI}</p>
+        <p>approvedTKN: {InfoStore.approvedTKN}</p>
+      </div>
+    )
+  }
+}
+
+export default Info

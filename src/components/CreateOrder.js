@@ -30,29 +30,18 @@ const styles = theme => ({
   },
 })
 
-@inject('Store')
+@inject('CreateOrderStore')
 @observer
-class Sell extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      price: '',
-      minPrice: '',
-      amount: '',
-      checkedBalance: true,
-      result: '',
-      orders: [],
-    }
-  }
+class CreateOrder extends React.Component {
 
-  handleChange = name => event => {
-    this.setState({
-      [name]: event.target.value,
-    })
-  }
+  // handleChange = name => event => {
+  //   this.setState({
+  //     [name]: event.target.value,
+  //   })
+  // }
 
   render() {
-    const { classes } = this.props
+    const {CreateOrderStore, classes} = this.props
     return (
       <div>
         <style jsx="true">{`
@@ -63,36 +52,36 @@ class Sell extends React.Component {
             }
         `}</style>
         <div class="header">Sell</div>
-        <form className={classes.container} noValidate autoComplete="off" onSubmit={this.sellAll}>
+        <form className={classes.container} noValidate autoComplete="off" onSubmit={console.log('submit')}>
           <TextField
             id="price"
             label="Price"
             className={classes.textField}
-            value={this.state.price}
-            onChange={this.handleChange('price')}
+            value={CreateOrderStore.price}
+            onChange={console.log('changed')}
             margin="normal"
           />
           <TextField
             id="amount"
             label="Amount"
             className={classes.textField}
-            value={this.state.amount}
-            onChange={this.handleChange('amount')}
+            value={CreateOrderStore.amount}
+            onChange={console.log('changed')}
             margin="normal"
           />
           <TextField
             id="minAmount"
             label="Min amount"
             className={classes.textField}
-            value={this.state.minAmount}
-            onChange={this.handleChange('minAmount')}
+            value={CreateOrderStore.minAmount}
+            onChange={console.log('changed')}
             margin="normal"
           />
           <FormControlLabel
             control={
               <Checkbox
-                checked={this.state.checkedBalance}
-                onChange={this.handleChange('checkedBalance')}
+                checked={CreateOrderStore.unencumbered}
+                onChange={console.log('changed')}
                 value="checkedBalance"
                 color="primary"
               />
@@ -101,37 +90,35 @@ class Sell extends React.Component {
           />
           <Button variant="contained" color="primary" className={classes.button} fullWidth="true" type="submit">Sell</Button>
           <ul>
-            <li>{this.state.result}</li>
-            <li>{this.state.orders}</li>
-            <li>{this.state.rebateAddress}</li>
+            <li>{CreateOrderStore.result}</li>
+            <li>{CreateOrderStore.orders}</li>
+            <li>{CreateOrderStore.rebateAddress}</li>
           </ul>
         </form>
       </div>
     )
   }
 
-  async sellAll(event) {
-    event.preventDefault()
-    var web3 = this.props.web3
-    var amount = web3.utils.toWei(this.state.amount)
-    var minAmount = web3.utils.toWei(this.state.minAmount)
-    var price = web3.utils.toWei(this.state.price)
-    // TODO Миша: продублировать min_amount
-    // TODO Миша: переменная, что делать с остатком
-    this.setState({
-      orders: this.findBidOrders(this.state.amount, this.state.price, this.state.minAmount)
-    })
-    // TODO Миша: sellall и willby правила написания
-    this.setState({
-      result: await this.bursa.methods.sellAll(amount, this.props.tokenAddress, price, this.state.orders, this.props.rebateAddress).send({from: this.props.wallet})
-    })
-  }
+  // async sellAll(event) {
+  //   event.preventDefault()
+  //   var web3 = this.props.web3
+  //   var amount = web3.utils.toWei(this.state.amount)
+  //   var minAmount = web3.utils.toWei(this.state.minAmount)
+  //   var price = web3.utils.toWei(this.state.price)
+  //   // TODO Миша: продублировать min_amount
+  //   // TODO Миша: переменная, что делать с остатком
+  //   this.setState({
+  //     orders: this.findBidOrders(this.state.amount, this.state.price, this.state.minAmount)
+  //   })
+  //   // TODO Миша: sellall и willby правила написания
+  //   this.setState({
+  //     result: await this.bursa.methods.sellAll(amount, this.props.tokenAddress, price, this.state.orders, this.props.rebateAddress).send({from: this.props.wallet})
+  //   })
+  // }
 }
 
-Sell.propTypes = {
+CreateOrder.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(Sell)
-
-// export default Sell
+export default withStyles(styles)(CreateOrder)

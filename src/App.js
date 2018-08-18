@@ -7,7 +7,7 @@ import _ from 'lodash'
 import dex from './contracts/bursa_ropsten'
 import Info from './components/Info'
 import Orders from './components/Orders'
-import Sell from './components/Sell'
+import CreateOrder from './components/CreateOrder'
 import {sleep} from './utils'
 
 import { observable } from 'mobx'
@@ -20,49 +20,14 @@ const originalLayouts = getFromLS("layouts") || {};
 /**
  * This layout demonstrates how to sync multiple responsive layouts to localstorage.
  */
-@inject('Store')
+@inject('InfoStore')
 @observer
 class App extends React.PureComponent {
-  @observable count = 0
-  @observable layouts = JSON.parse(JSON.stringify(originalLayouts))
-  @observable tokenDecimals = 18
-  @observable tokenName = '-'
-  @observable tokenSymbol = '-'
-  @observable orderbook = {
-    'asks': {},
-    'bids': {}
-  }
-  @observable web3 = undefined
-  @observable wallet = undefined
-  @observable balanceWEI = undefined
-  @observable balanceETH = undefined
-  @observable dexContract = undefined
-  @observable dexAddress = undefined
-  @observable tokenAddress = '0xafe5a978c593fe440d0c5e4854c5bd8511e770a4'
-  @observable rebateAddress = undefined
-  @observable tokenBalanceWEI = undefined
-  @observable tokenBalanceTKN = undefined
-  @observable depositWEI = undefined
-  @observable depositETH = undefined
-  @observable approvedWEI = undefined
-  @observable approvedTKN = undefined
-
   constructor(props) {
-    super(props);
-
+    super(props)
     this.state = {
-      // layouts: JSON.parse(JSON.stringify(originalLayouts)),
-      // tokenDecimals: 18,
-      // tokenName: '-',
-      // tokenSymbol: '-',
-      // asks: {},
-      // orderbook: {
-      //   'asks': {},
-      //   'bids': {}
-      // },
-      // bids: {},
-      // web3: undefined
-    };
+      layouts: JSON.parse(JSON.stringify(originalLayouts)),
+    }
   }
 
   static get defaultProps() {
@@ -87,6 +52,7 @@ class App extends React.PureComponent {
     // const { orderbook, wallet, balanceWEI, balanceETH, dexAddress, tokenAddress, tokenDecimals, tokenBalanceWEI,
     // tokenBalanceTKN, tokenName, tokenSymbol, depositWEI, depositETH, approvedWEI, approvedTKN, web3, rebateAddress} = this.state
     // // var asks = orderbook.asks
+    const {InfoStore} = this.props
     const infoOptions = {
       wallet: this.wallet,
       balanceWEI: this.balanceWEI,
@@ -128,56 +94,58 @@ class App extends React.PureComponent {
             <Info {...infoOptions} />
           </div>
           <div key="2" data-grid={{ w: 2, h: 3, x: 2, y: 0, minW: 2, minH: 3 }}>
-            <Orders orders={this.orderbook.asks} header="ASKS" />
+            <Orders orders={InfoStore.orderbook.asks} header="ASKS" />
           </div>
           <div key="3" data-grid={{ w: 2, h: 3, x: 4, y: 0, minW: 2, minH: 3 }}>
-             <Orders orders={this.orderbook.bids} header="BIDS" />
+             <Orders orders={InfoStore.orderbook.bids} header="BIDS" />
           </div>
           <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
-            {Store.birds}
+            <CreateOrder />
           </div>
           <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
-            {Store.wallet}
+            5
           </div>
         </ResponsiveReactGridLayout>
       </div>
     );
   }
   async componentWillMount() {
+    const {InfoStore} = this.props
     var ORDERBOOK = {
       'bids': {},
       'asks': {}
     }
-    this.web3 = await dex._init()
-    this.wallet = await dex._wallet(this.web3)
-    this.props.Store.wallet = this.wallet
-    this.rebateAddress = this.wallet
-    this.balanceWEI = await this.web3.eth.getBalance(this.wallet)
-    this.balanceETH = this.web3.utils.fromWei(this.balanceWEI)
-    this.dexContract = new this.web3.eth.Contract(dex.abi, dex.address)
-    this.dexAddress = dex.address
-    this.tokenContract = new this.web3.eth.Contract(dex.abi, this.tokenAddress)
+    InfoStore.web3 = await dex._init()
+    InfoStore.wallet = await dex._wallet(InfoStore.web3)
+    InfoStore.wallet = InfoStore.wallet
+    InfoStore.rebateAddress = InfoStore.wallet
+    InfoStore.balanceWEI = await InfoStore.web3.eth.getBalance(InfoStore.wallet)
+    InfoStore.balanceETH = InfoStore.web3.utils.fromWei(InfoStore.balanceWEI)
+    InfoStore.dexContract = new InfoStore.web3.eth.Contract(dex.abi, dex.address)
+    InfoStore.dexAddress = dex.address
+    InfoStore.tokenContract = new InfoStore.web3.eth.Contract(dex.abi, InfoStore.tokenAddress)
     try {
       // not all erc20 has got public var "decimals"
-      this.tokenDecimals = await this.tokenContract.methods.decimals().call()
-      // this.setState({ tokenDecimals })
+      InfoStore.tokenDecimals = await InfoStore.tokenContract.methods.decimals().call()
+      // InfoStore.setState({ tokenDecimals })
     } catch(err) { console.log(err) }
-    this.tokenBalanceWEI = await this.tokenContract.methods.balanceOf(this.wallet).call()
-    this.tokenBalanceTKN = this.tokenBalanceWEI / Math.pow(10, this.state.tokenDecimals)
+    InfoStore.tokenBalanceWEI = await InfoStore.tokenContract.methods.balanceOf(InfoStore.wallet).call()
+    InfoStore.tokenBalanceTKN = InfoStore.tokenBalanceWEI / Math.pow(10, InfoStore.tokenDecimals)
     try {
       // not all erc20 has got public var "name"
-      this.tokenName = await this.tokenContract.methods.name().call()
-      // this.setState({ tokenName })
+      InfoStore.tokenName = await InfoStore.tokenContract.methods.name().call()
+      // InfoStore.setState({ tokenName })
     } catch(err) { console.log(err) }
     try {
       // not all erc20 has got public var "symbol"
-      this.tokenSymbol = await this.tokenContract.methods.symbol().call()
-      // this.setState({ tokenSymbol })
+      InfoStore.tokenSymbol = await InfoStore.tokenContract.methods.symbol().call()
+      // InfoStore.setState({ tokenSymbol })
     } catch(err) { console.log(err) }
-    this.depositWEI = await this.dexContract.methods.balanceOf(this.wallet).call()
-    this.depositETH = this.web3.utils.fromWei(this.depositWEI)
-    this.approvedWEI = await this.dexContract.methods.balanceApprovedForToken(this.tokenAddress, this.wallet).call()
-    this.approvedTKN = this.web3.utils.fromWei(this.approvedWEI)
+    InfoStore.depositWEI = await InfoStore.dexContract.methods.balanceOf(InfoStore.wallet).call()
+    InfoStore.depositETH = InfoStore.web3.utils.fromWei(InfoStore.depositWEI)
+    InfoStore.approvedWEI = await InfoStore.dexContract.methods.balanceApprovedForToken(InfoStore.tokenAddress, InfoStore.wallet).call()
+    // InfoStore.approvedTKN = InfoStore.web3.utils.fromWei(this.approvedWEI)
+    // TODO
     // asks
     // var getAsks = async () => {
 
@@ -202,7 +170,8 @@ class App extends React.PureComponent {
     // Опустошитель очереди (Ice bucket)
     const dropQueue = () => {
       // var orderbook = this.state.orderbook
-      var orderbook = this.orderbook
+      const {InfoStore} = this.props
+      var orderbook = InfoStore.orderbook
       _.forEach(ORDERBOOK['asks'], function(order, i){
         orderbook['asks'][i] = order
       })
@@ -212,7 +181,7 @@ class App extends React.PureComponent {
       // orderbook['asks'] = _.orderBy(orderbook['asks'], ['priceNumber'], ['asc'])
       ORDERBOOK = {asks: {}, bids: {}}
       // this.setState({ orderbook })
-      this.orderbook = orderbook
+      InfoStore.orderbook = orderbook
       // TODO как-то отказаться от форса?
       this.forceUpdate()
     }
@@ -228,24 +197,25 @@ class App extends React.PureComponent {
 
     // LOAD ORDERBOOK in GLOBAL VAR
     const getOrder = async (orderPosition, type) => {
+      const {InfoStore} = this.props
       if (type === 'asks')
-        var result = await this.dexContract.methods.willsellInfo(this.tokenAddress, orderPosition).call()
+        var result = await InfoStore.dexContract.methods.willsellInfo(InfoStore.tokenAddress, orderPosition).call()
       else // bids
-        var result = await this.dexContract.methods.willbuyInfo(this.tokenAddress, orderPosition).call()
+        var result = await InfoStore.dexContract.methods.willbuyInfo(InfoStore.tokenAddress, orderPosition).call()
       return {
         // TODO много лишнего
         id: orderPosition,
         user: result[0].toString(),
         icon: new Identicon(result[0].toString(), 18).toString(),
-        price: this.web3.utils.fromWei(result[1]),
-        priceNumber: parseFloat( this.web3.utils.fromWei(result[1]) ),
+        price: InfoStore.web3.utils.fromWei(result[1]),
+        priceNumber: parseFloat( InfoStore.web3.utils.fromWei(result[1]) ),
         priceWEI: result[1],
         priceWEINumber: parseFloat(result[1]),
-        amount: this.web3.utils.fromWei(result[2]),
-        amountNumber: parseFloat( this.web3.utils.fromWei(result[2]) ),
+        amount: InfoStore.web3.utils.fromWei(result[2]),
+        amountNumber: parseFloat( InfoStore.web3.utils.fromWei(result[2]) ),
         amountWEI: result[2],
         amountWEINumber: parseFloat(result[2]),
-        total: this.web3.utils.fromWei(result[1]) * this.web3.utils.fromWei(result[2])
+        total: InfoStore.web3.utils.fromWei(result[1]) * InfoStore.web3.utils.fromWei(result[2])
       }
     }
     const getAsksOnce = async function() {

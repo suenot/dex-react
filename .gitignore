@@ -1,13 +1,16 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
+# private
+private/
+
 # dependencies
-/node_modules
+node_modules/
 
 # testing
-/coverage
+coverage/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -17,5 +20,19 @@
 .env.production.local
 
 npm-debug.log*
+package-lock.json
 yarn-debug.log*
 yarn-error.log*
+yarn.lock
+
+
+.vscode
+*.snap
+*.xlog
+.rocks/
+.rocks/
+.rocks
+__pycache__
+temp/
+tmp/
+npm-debug.log*
