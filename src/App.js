@@ -2,12 +2,10 @@ import React from "react"
 import { WidthProvider, Responsive } from "react-grid-layout"
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import Identicon from 'identicon.js'
 import _ from 'lodash'
 import Info from './components/Info'
 import Orders from './components/Orders'
 import CreateOrder from './components/CreateOrder'
-// import {sleep} from './utils'
 
 import { observable } from 'mobx'
 import { inject, observer } from 'mobx-react'
@@ -71,6 +69,7 @@ class App extends React.Component {
             <Orders type="asks" />
           </div>
           <div key="3" data-grid={{ w: 2, h: 3, x: 4, y: 0, minW: 2, minH: 3 }}>
+            <Orders type="bids" />
           </div>
           <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
             <CreateOrder />
