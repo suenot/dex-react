@@ -6,6 +6,8 @@ import _ from 'lodash'
 import Info from './components/Info'
 import Orders from './components/Orders'
 import CreateOrder from './components/CreateOrder'
+import HeikinAshi from './components/charts/HeikinAshi'
+import Crocodile from './components/charts/Crocodile'
 
 import { observable } from 'mobx'
 import { inject, observer } from 'mobx-react'
@@ -75,7 +77,10 @@ class App extends React.Component {
             <CreateOrder />
           </div>
           <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
-            5
+            <HeikinAshi tokenAddress="0xe41d2489571d322189246dafa5ebde1f4699f498" />
+          </div>
+          <div key="6" data-grid={{ w: 2, h: 3, x: 2, y: 0, minW: 2, minH: 3 }}>
+            <Crocodile tokenAddress="0xe41d2489571d322189246dafa5ebde1f4699f498" />
           </div>
         </ResponsiveReactGridLayout>
       </div>
