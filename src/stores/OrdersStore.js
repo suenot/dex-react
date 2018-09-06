@@ -4,6 +4,24 @@ import {sleep} from '../utils'
 import Identicon from 'identicon.js'
 import _ from 'lodash'
 
+
+function dynamicSort(property) {
+  var sortOrder = 1
+
+  if(property[0] === "-") {
+      sortOrder = -1
+      property = property.substr(1)
+  }
+
+  return function (a,b) {
+      if(sortOrder == -1){
+          return b[property].localeCompare(a[property])
+      }else{
+          return a[property].localeCompare(b[property])
+      }
+  }
+}
+
 // var ORDERBOOK = {
 //   'bids': {},
 //   'asks': {}
@@ -23,41 +41,22 @@ class OrdersStore {
     @computed get tokenAddress() {
       return InfoStore.tokenAddress
     }
-    // orders store
-    // @observable _asks = {}
-    // @observable _bids = {}
     @observable asks = {}
     @observable bids = {}
 
-    // @computed get asks(asks) {
-    //   // var asks = _.clone(toJS(this.asks))
-    //   var _asks = _.clone(toJS(this._asks))
-    //   this._asks = {}
-    //   _.forEach(_asks, function(ask, i){
-    //     console.log(ask, i)
-    //     asks[i] = ask
-    //   })
-    //   return asks
-    // }
-
-    // @computed get asks() {
-    //   return this._asks
-    // }
-    // @computed get bids() {
-    //   return this._bids
-    // }
-
-
     // Опустошитель очереди (Ice bucket)
     async dropQueueCycle() {
+      // var testCount = 0
+      // while (testCount < 3) {
       while (true) {
+        // testCount += 1
         // dropOldOrders()
         await this.dropQueue()
-        await sleep(1000)
+        await sleep(5000)
         // console.log(ORDERBOOK)
       }
     }
-    async dropQueue() {
+    @action async dropQueue() {
       var asks = this.asks
       var bids = this.bids
       _.forEach(ASKS, function(order, i){
@@ -68,6 +67,8 @@ class OrdersStore {
       })
       // TODO SORT
       // asks = _.object( _.orderBy(asks, ['priceNumber'], ['asc']) )
+      // var bids = _.keyBy(_.orderBy(bids, ['price'], ['desc']), 'id')
+
       ASKS = {}
       BIDS = {}
       this.asks = asks
@@ -76,7 +77,7 @@ class OrdersStore {
     async getOrdersCycle() {
       while (true) {
         await this.getOrdersOnce()
-        await sleep(10000)
+        await sleep(100000000)
       }
     }
     async getOrdersOnce() {
@@ -103,17 +104,17 @@ class OrdersStore {
     async getOrder(orderPosition, type) {
       var result
       COUNT++
-      console.log(COUNT)
+      // console.log(COUNT)
       if (type === 'asks') {
         result = await this.dexContract.methods.willsellInfo(this.tokenAddress, orderPosition).call()
       }
       else {
         result = await this.dexContract.methods.willbuyInfo(this.tokenAddress, orderPosition).call()
       }
-      console.log(result)
+      // console.log(result)
       return {
         // TODO много лишнего
-        id: orderPosition,
+        id: orderPosition.toString(),
         user: result[0].toString(),
         icon: new Identicon(result[0].toString(), 18).toString(),
         price: this.web3.utils.fromWei(result[1]),
@@ -134,7 +135,7 @@ const store = window.OrdersStore = new OrdersStore()
 export default store
 
 autorun(() => {
-  console.log(InfoStore.wallet)
+  // console.log(InfoStore.wallet)
   store.getOrdersCycle()
   store.dropQueueCycle()
 })

@@ -33,15 +33,8 @@ const styles = theme => ({
 @inject('CreateOrderStore')
 @observer
 class CreateOrder extends React.Component {
-
-  // handleChange = name => event => {
-  //   this.setState({
-  //     [name]: event.target.value,
-  //   })
-  // }
-
   render() {
-    const {CreateOrderStore, classes} = this.props
+    const {CreateOrderStore, classes, type} = this.props
     return (
       <div>
         <style jsx="true">{`
@@ -51,13 +44,13 @@ class CreateOrder extends React.Component {
               display: block;
             }
         `}</style>
-        <div class="header">Sell</div>
+        <div class="header">{type}</div>
         <form className={classes.container} noValidate autoComplete="off" onSubmit={console.log('submit')}>
           <TextField
             id="price"
             label="Price"
             className={classes.textField}
-            value={CreateOrderStore.price}
+            value={CreateOrderStore[type].price}
             onChange={console.log('changed')}
             margin="normal"
           />
@@ -65,22 +58,22 @@ class CreateOrder extends React.Component {
             id="amount"
             label="Amount"
             className={classes.textField}
-            value={CreateOrderStore.amount}
+            value={CreateOrderStore[type].amount}
             onChange={console.log('changed')}
             margin="normal"
           />
           <TextField
             id="minAmount"
-            label="Min amount"
+            label="Min amount of each order"
             className={classes.textField}
-            value={CreateOrderStore.minAmount}
+            value={CreateOrderStore[type].minAmount}
             onChange={console.log('changed')}
             margin="normal"
           />
           <FormControlLabel
             control={
               <Checkbox
-                checked={CreateOrderStore.unencumbered}
+                checked={CreateOrderStore[type].unencumbered}
                 onChange={console.log('changed')}
                 value="checkedBalance"
                 color="primary"
@@ -90,9 +83,9 @@ class CreateOrder extends React.Component {
           />
           <Button variant="contained" color="primary" className={classes.button} fullWidth="true" type="submit">Sell</Button>
           <ul>
-            <li>{CreateOrderStore.result}</li>
-            <li>{CreateOrderStore.orders}</li>
-            <li>{CreateOrderStore.rebateAddress}</li>
+            <li>{CreateOrderStore[type].result}</li>
+            <li>{CreateOrderStore[type].orders}</li>
+            <li>{CreateOrderStore[type].rebateAddress}</li>
           </ul>
         </form>
       </div>

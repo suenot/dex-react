@@ -74,13 +74,10 @@ class App extends React.Component {
             <Orders type="bids" />
           </div>
           <div key="4" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
-            <CreateOrder />
+            <CreateOrder type="sell" />
           </div>
-          <div key="5" data-grid={{ w: 2, h: 3, x: 8, y: 0, minW: 2, minH: 3 }}>
-            <HeikinAshi tokenAddress="0xe41d2489571d322189246dafa5ebde1f4699f498" />
-          </div>
-          <div key="6" data-grid={{ w: 2, h: 3, x: 2, y: 0, minW: 2, minH: 3 }}>
-            <Crocodile tokenAddress="0xe41d2489571d322189246dafa5ebde1f4699f498" />
+          <div key="5" data-grid={{ w: 2, h: 3, x: 6, y: 0, minW: 2, minH: 3 }}>
+            <CreateOrder type="buy" />
           </div>
         </ResponsiveReactGridLayout>
       </div>
